@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block pagetitle %}AI Engine{% endblock pagetitle %}
+
+{% block body %}
+<div class="container py-5">
+
+  <!-- Hero Section -->
+  <div class="text-center mb-5">
+    <h1 class="display-3 fw-bold text-success animate__animated animate__fadeInDown">🍀 AI Engine 🍀</h1>
+    <p class="lead text-dark fw-semibold animate__animated animate__fadeInUp">Let AI help you detect plant diseases instantly!</p>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Why Detect Diseases -->
+    <div class="col-lg-4">
+      <div class="card shadow-lg h-100 border-0 hover-card p-4">
+        <h5 class="fw-bold text-success">Why Detect Plant Disease?</h5>
+        <p>
+          Plant diseases can stunt growth or destroy crops. Early detection saves time, money, and ensures healthier plants.
+        </p>
+      </div>
+    </div>
+
+    <!-- Image Upload + Camera -->
+    <div class="col-lg-4">
+      <div class="card shadow-lg h-100 border-0 hover-card text-center p-4">
+        <img src="https://www.pngjoy.com/pngl/250/4840262_plants-png-indoors-tropical-plant-png-hd-png.png" 
+             class="rounded-pill mb-3 mx-auto" width="180" height="220">
+        <form action="/submit" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <input type="file" id="actual-btn" hidden name="image" />
+            <label for="actual-btn" class="btn btn-outline-success w-100 mb-2">Choose File</label>
+            <label id="camera-btn" class="btn btn-outline-primary w-100 mb-2">Open Camera</label>
+            <span id="file-chosen" class="d-block text-muted">No file chosen</span>
+          </div>
+
+          <div id="camera-container" class="mb-3" style="display:none;">
+            <video id="camera-feed" width="100%" autoplay class="rounded"></video>
+            <button type="button" id="capture-btn" class="btn btn-success mt-2 w-100">Capture Photo</button>
+          </div>
+
+          <img id="preview" src="#" alt="Preview" class="img-fluid rounded mb-2" style="display:none;"/>
+
+          <button type="submit" class="btn btn-success w-100">Submit</button>
+        </form>
+        <small class="text-muted mt-2 d-block">Upload your plant's leaf image and let AI do the magic!</small>
+      </div>
+    </div>
+
+    <!-- Prevention Tips -->
+    <div class="col-lg-4">
+      <div class="card shadow-lg h-100 border-0 hover-card p-4">
+        <h5 class="fw-bold text-success">Prevent Plant Diseases</h5>
+        <ol>
+          <li>Follow Good Sanitation Practices</li>
+          <li>Fertilize to Keep Plants Healthy</li>
+          <li>Inspect Plants Before Bringing Home</li>
+          <li>Warm Soil Before Planting</li>
+          <li>Rotate Crops for Healthy Garden</li>
+          <li>Provide Good Air Circulation</li>
+          <li>Remove Diseased Foliage</li>
+        </ol>
+        <a href="https://www.thespruce.com/prevent-plant-diseases-in-your-garden-2539511" 
+           target="_blank" class="btn btn-outline-success mt-3 w-100">More Info</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 20px;
+}
+.hover-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+</style>
+
+<script>
+  // Your existing camera & file upload JS (unchanged)
+  const actualBtn = document.getElementById('actual-btn');
+  const captureBtn = document.getElementById('capture-btn');
+  const fileChosen = document.getElementById('file-chosen');
+  let capturedFile = null;
+
+  actualBtn.addEventListener('change', function () {
+      fileChosen.textContent = this.files[0].name
+  });
+
+  document.getElementById('camera-btn').addEventListener('click', function () {
+      document.getElementById('camera-container').style.display = 'block';
+      startCamera();
+  });
+
+  async function startCamera() {
+      const videoElement = document.getElementById('camera-feed');
+      try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          videoElement.srcObject = stream;
+      } catch (err) {
+          console.error('Error accessing the camera: ', err);
+      }
+  }
+
+  document.getElementById('capture-btn').addEventListener('click', function () {
+      const video = document.getElementById('camera-feed');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      capturedFile = dataURItoBlob(dataUrl);
+      fileChosen.textContent = 'Image Captured';
+      document.getElementById('preview').src = dataUrl;
+      document.getElementById('preview').style.display = 'block';
+  });
+
+  function dataURItoBlob(dataURI) {
+      const byteString = atob(dataURI.split(',')[1]);
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const uintArray = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < byteString.length; i++) {
+          uintArray[i] = byteString.charCodeAt(i);
+      }
+      return new File([uintArray], "camera_image.jpg", { type: 'image/jpeg' });
+  }
+</script>
+{% endblock body %}

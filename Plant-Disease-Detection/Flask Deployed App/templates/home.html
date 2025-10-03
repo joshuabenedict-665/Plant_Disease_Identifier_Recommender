@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block pagetitle %}Home{% endblock pagetitle %}
+
+{% block body %}
+<div class="container py-5 text-center">
+    <h1 class="display-3 fw-bold text-success animate__animated animate__fadeInDown">Welcome to PlantAI 🍀</h1>
+    <p class="lead text-dark fw-semibold animate__animated animate__fadeInUp mt-3">Detect diseases in your plants and buy the right supplements instantly!</p>
+    <a href="/index" class="btn btn-success btn-lg mt-4 animate__animated animate__fadeInUp">Go to AI Engine</a>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4 hover-card">
+                <h5 class="fw-bold text-success">Detect Diseases</h5>
+                <p>Upload your plant leaf image and let AI detect disease instantly.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4 hover-card">
+                <h5 class="fw-bold text-success">Get Supplements</h5>
+                <p>Buy fertilizers & supplements recommended for your plant’s health.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4 hover-card">
+                <h5 class="fw-bold text-success">Prevent Disease</h5>
+                <p>Follow AI-backed tips to keep your plants healthy and thriving.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
