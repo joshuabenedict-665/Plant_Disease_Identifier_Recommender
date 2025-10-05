@@ -5,8 +5,8 @@ import torchvision.transforms.functional as TF
 import torch
 import numpy as np
 import pandas as pd
-import gdown  # for downloading the model
-from .CNN import CNN  # make sure your CNN.py has a CNN class
+import gdown
+from .CNN import CNN  # make sure CNN.py has CNN class
 
 # -----------------------------
 # Paths
@@ -30,7 +30,8 @@ if not os.path.exists(MODEL_PATH):
     print("Downloading model from Google Drive...")
     gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
 
-model = CNN()
+NUM_CLASSES = len(disease_info)
+model = CNN(K=NUM_CLASSES)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
 model.eval()
 
@@ -40,7 +41,7 @@ model.eval()
 def prediction(image_path):
     image = Image.open(image_path).convert('RGB')
     image = image.resize((224, 224))
-    input_data = TF.to_tensor(image).unsqueeze(0)
+    input_data = TF.to_tensor(image).unsqueeze(0)  # shape: [1, 3, 224, 224]
     with torch.no_grad():
         output = model(input_data)
     output = output.numpy()
@@ -110,5 +111,5 @@ def market():
 # Run
 # -----------------------------
 if __name__ == '__main__':
-    # For Render, do not set debug=True
+    # Render does not use debug mode
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
