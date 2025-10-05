@@ -1,1 +1,1 @@
-web: gunicorn "Plant-Disease-Detection/Flask Deployed App/app:app"
+web: gunicorn "Plant-Disease-Detection.flask_app.app:app"
