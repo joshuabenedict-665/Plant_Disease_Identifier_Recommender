@@ -5,7 +5,6 @@ import torchvision.transforms.functional as TF
 import torch
 import numpy as np
 import pandas as pd
-import gdown
 from .CNN import CNN  # Ensure your CNN.py has CNN class accepting K parameter
 
 # -----------------------------
@@ -17,22 +16,17 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DISEASE_INFO_PATH = os.path.join(BASE_DIR, 'disease_info.csv')
 SUPPLEMENT_INFO_PATH = os.path.join(BASE_DIR, 'supplement_info.csv')
+MODEL_PATH = os.path.join(BASE_DIR, 'plant_disease_model_1_latest.pt')
 
+# -----------------------------
+# Load data
+# -----------------------------
 disease_info = pd.read_csv(DISEASE_INFO_PATH, encoding='cp1252')
 supplement_info = pd.read_csv(SUPPLEMENT_INFO_PATH, encoding='cp1252')
 
 # -----------------------------
 # Model setup
 # -----------------------------
-MODEL_PATH = os.path.join(BASE_DIR, 'plant_disease_model_1_latest.pt')
-GDRIVE_FILE_ID = "1KQIgBiiX2e3OluN5B6sNFOSF0jdXVa9s"
-GDRIVE_URL = f"https://drive.google.com/uc?id={GDRIVE_FILE_ID}"
-
-# Download model if not present
-if not os.path.exists(MODEL_PATH):
-    print("Downloading model from Google Drive...")
-    gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
-
 NUM_CLASSES = len(disease_info)
 model = CNN(K=NUM_CLASSES)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
@@ -82,13 +76,13 @@ def submit():
 
         pred = prediction(file_path)
 
-        # Fetch disease info
+        # Disease info
         title = disease_info.at[pred, 'disease_name']
         description = disease_info.at[pred, 'description']
         prevent = disease_info.at[pred, 'Possible Steps']
         image_url = disease_info.at[pred, 'image_url']
 
-        # Fetch supplement info
+        # Supplement info
         supplement_name = supplement_info.at[pred, 'supplement name']
         supplement_image_url = supplement_info.at[pred, 'supplement image']
         supplement_buy_link = supplement_info.at[pred, 'buy link']
@@ -116,5 +110,4 @@ def market():
 # Run
 # -----------------------------
 if __name__ == '__main__':
-    # Render does not use debug mode
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
