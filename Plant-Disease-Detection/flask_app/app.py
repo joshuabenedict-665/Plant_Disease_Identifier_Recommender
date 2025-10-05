@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import pandas as pd
 import gdown
-from .CNN import CNN  # make sure CNN.py has CNN class
+from .CNN import CNN  # Ensure your CNN.py has CNN class accepting K parameter
 
 # -----------------------------
 # Paths
@@ -15,8 +15,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # flask_app folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-disease_info = pd.read_csv(os.path.join(BASE_DIR, 'disease_info.csv'), encoding='cp1252')
-supplement_info = pd.read_csv(os.path.join(BASE_DIR, 'supplement_info.csv'), encoding='cp1252')
+DISEASE_INFO_PATH = os.path.join(BASE_DIR, 'disease_info.csv')
+SUPPLEMENT_INFO_PATH = os.path.join(BASE_DIR, 'supplement_info.csv')
+
+disease_info = pd.read_csv(DISEASE_INFO_PATH, encoding='cp1252')
+supplement_info = pd.read_csv(SUPPLEMENT_INFO_PATH, encoding='cp1252')
 
 # -----------------------------
 # Model setup
@@ -79,14 +82,16 @@ def submit():
 
         pred = prediction(file_path)
 
-        title = disease_info['disease_name'][pred]
-        description = disease_info['description'][pred]
-        prevent = disease_info['Possible Steps'][pred]
-        image_url = disease_info['image_url'][pred]
+        # Fetch disease info
+        title = disease_info.at[pred, 'disease_name']
+        description = disease_info.at[pred, 'description']
+        prevent = disease_info.at[pred, 'Possible Steps']
+        image_url = disease_info.at[pred, 'image_url']
 
-        supplement_name = supplement_info['supplement name'][pred]
-        supplement_image_url = supplement_info['supplement image'][pred]
-        supplement_buy_link = supplement_info['buy link'][pred]
+        # Fetch supplement info
+        supplement_name = supplement_info.at[pred, 'supplement name']
+        supplement_image_url = supplement_info.at[pred, 'supplement image']
+        supplement_buy_link = supplement_info.at[pred, 'buy link']
 
         return render_template('submit.html',
                                title=title,
