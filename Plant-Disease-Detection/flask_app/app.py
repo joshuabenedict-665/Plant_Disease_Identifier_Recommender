@@ -2,25 +2,37 @@ import os
 from flask import Flask, redirect, render_template, request
 from PIL import Image
 import torchvision.transforms.functional as TF
-from . import CNN
-import numpy as np
 import torch
+import numpy as np
 import pandas as pd
+import gdown  # for downloading the model
+from .CNN import CNN  # make sure your CNN.py has a CNN class
 
 # -----------------------------
 # Paths
 # -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # flask_app folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # ensure folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 disease_info = pd.read_csv(os.path.join(BASE_DIR, 'disease_info.csv'), encoding='cp1252')
 supplement_info = pd.read_csv(os.path.join(BASE_DIR, 'supplement_info.csv'), encoding='cp1252')
 
-model_path = os.path.join(BASE_DIR, 'plant_disease_model_1_latest.pt')
-model = CNN()  # instantiate your CNN class
-model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-model.eval()  # set to evaluation mode
+# -----------------------------
+# Model setup
+# -----------------------------
+MODEL_PATH = os.path.join(BASE_DIR, 'plant_disease_model_1_latest.pt')
+GDRIVE_FILE_ID = "1KQIgBiiX2e3OluN5B6sNFOSF0jdXVa9s"
+GDRIVE_URL = f"https://drive.google.com/uc?id={GDRIVE_FILE_ID}"
+
+# Download model if not present
+if not os.path.exists(MODEL_PATH):
+    print("Downloading model from Google Drive...")
+    gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
+
+model = CNN()
+model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+model.eval()
 
 # -----------------------------
 # Prediction function
@@ -28,12 +40,11 @@ model.eval()  # set to evaluation mode
 def prediction(image_path):
     image = Image.open(image_path).convert('RGB')
     image = image.resize((224, 224))
-    input_data = TF.to_tensor(image).unsqueeze(0)  # shape: [1, 3, 224, 224]
+    input_data = TF.to_tensor(image).unsqueeze(0)
     with torch.no_grad():
         output = model(input_data)
     output = output.numpy()
-    index = np.argmax(output)
-    return index
+    return np.argmax(output)
 
 # -----------------------------
 # Flask app
@@ -64,18 +75,18 @@ def submit():
         filename = image.filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         image.save(file_path)
-        
+
         pred = prediction(file_path)
-        
+
         title = disease_info['disease_name'][pred]
         description = disease_info['description'][pred]
         prevent = disease_info['Possible Steps'][pred]
         image_url = disease_info['image_url'][pred]
-        
+
         supplement_name = supplement_info['supplement name'][pred]
         supplement_image_url = supplement_info['supplement image'][pred]
         supplement_buy_link = supplement_info['buy link'][pred]
-        
+
         return render_template('submit.html',
                                title=title,
                                desc=description,
@@ -99,4 +110,5 @@ def market():
 # Run
 # -----------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    # For Render, do not set debug=True
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
