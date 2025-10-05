@@ -8,12 +8,13 @@ import torch
 import pandas as pd
 
 
-disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
-supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # flask_app folder
 
-model = CNN.CNN(39)    
-model.load_state_dict(torch.load("plant_disease_model_1_latest.pt"))
-model.eval()
+disease_info = pd.read_csv(os.path.join(BASE_DIR, 'disease_info.csv'), encoding='cp1252')
+supplement_info = pd.read_csv(os.path.join(BASE_DIR, 'supplement_info.csv'), encoding='cp1252')
+
+model_path = os.path.join(BASE_DIR, 'plant_disease_model_1_latest.pt')
+model.load_state_dict(torch.load(model_path))
 
 def prediction(image_path):
     image = Image.open(image_path)
