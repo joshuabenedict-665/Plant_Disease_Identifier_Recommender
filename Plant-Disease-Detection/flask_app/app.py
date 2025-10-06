@@ -5,7 +5,7 @@ import torchvision.transforms.functional as TF
 import torch
 import numpy as np
 import pandas as pd
-from .CNN import CNN  # Ensure your CNN.py has CNN class accepting K parameter
+from CNN import CNN  # ✅ fixed import (no dot)
 
 # -----------------------------
 # Paths
@@ -28,6 +28,8 @@ supplement_info = pd.read_csv(SUPPLEMENT_INFO_PATH, encoding='cp1252')
 # Model setup
 # -----------------------------
 NUM_CLASSES = len(disease_info)
+
+# ✅ Load CNN class model
 model = CNN(K=NUM_CLASSES)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
 model.eval()
@@ -41,7 +43,7 @@ def prediction(image_path):
     input_data = TF.to_tensor(image).unsqueeze(0)  # shape: [1, 3, 224, 224]
     with torch.no_grad():
         output = model(input_data)
-    output = output.numpy()
+        output = output.detach().cpu().numpy()
     return np.argmax(output)
 
 # -----------------------------
@@ -87,27 +89,31 @@ def submit():
         supplement_image_url = supplement_info.at[pred, 'supplement image']
         supplement_buy_link = supplement_info.at[pred, 'buy link']
 
-        return render_template('submit.html',
-                               title=title,
-                               desc=description,
-                               prevent=prevent,
-                               image_url=image_url,
-                               pred=pred,
-                               sname=supplement_name,
-                               simage=supplement_image_url,
-                               buy_link=supplement_buy_link)
+        return render_template(
+            'submit.html',
+            title=title,
+            desc=description,
+            prevent=prevent,
+            image_url=image_url,
+            pred=pred,
+            sname=supplement_name,
+            simage=supplement_image_url,
+            buy_link=supplement_buy_link
+        )
     return redirect('/')
 
 @app.route('/market', methods=['GET', 'POST'])
 def market():
-    return render_template('market.html',
-                           supplement_image=list(supplement_info['supplement image']),
-                           supplement_name=list(supplement_info['supplement name']),
-                           disease=list(disease_info['disease_name']),
-                           buy=list(supplement_info['buy link']))
+    return render_template(
+        'market.html',
+        supplement_image=list(supplement_info['supplement image']),
+        supplement_name=list(supplement_info['supplement name']),
+        disease=list(disease_info['disease_name']),
+        buy=list(supplement_info['buy link'])
+    )
 
 # -----------------------------
-# Run
+# Run the app
 # -----------------------------
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

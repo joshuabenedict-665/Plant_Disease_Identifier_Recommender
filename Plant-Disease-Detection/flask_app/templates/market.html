@@ -9,25 +9,53 @@
     <p class="lead fw-semibold text-dark">Buy Supplements & Fertilizers at one place!</p>
   </div>
 
-  <div class="row g-4">
-    {% for index in range(0, supplement_name | length) %}
-    {% if index != 4 %}
-    <div class="col-lg-3 col-md-4 col-sm-6">
-      <div class="card shadow-lg h-100 border-0 hover-card text-center p-3">
-        {% if index in [3,5,7,11,15,18,20,23,24,25,28,38] %}
-        <h5 class="text-success fw-bold">Fertilizer</h5>
-        {% else %}
-        <h5 class="text-danger fw-bold">Supplement</h5>
-        {% endif %}
-        <img src={{supplement_image[index]}} class="img-fluid rounded mb-3" style="height:250px;width:auto;">
-        <h6 class="fw-semibold">For {{disease[index]}}</h6>
-        <p>{{supplement_name[index]}}</p>
-        <a href={{buy[index]}} target="_blank" class="btn btn-success w-100">Buy Product</a>
+  {% set fertilizers = [] %}
+  {% set supplements = [] %}
+
+  {% for i in range(0, supplement_name | length) %}
+      {% if i != 4 %}
+          {% if i in [3,5,7,11,15,18,20,23,24,25,28,38] %}
+              {% set _ = fertilizers.append(i) %}
+          {% else %}
+              {% set _ = supplements.append(i) %}
+          {% endif %}
+      {% endif %}
+  {% endfor %}
+
+  <!-- Fertilizers Section -->
+  {% if fertilizers %}
+  <h2 class="text-success fw-bold mb-4">🌿 Fertilizers</h2>
+  <div class="row g-4 mb-5">
+    {% for i in fertilizers %}
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card shadow-lg h-100 border-0 hover-card text-center p-3">
+          <h5 class="text-success fw-bold mb-2">Fertilizer</h5>
+          <p class="fw-semibold mb-1">For {{ disease[i] }}</p>
+          <p class="mb-3">{{ supplement_name[i] }}</p>
+          <a href="{{ buy[i] }}" target="_blank" class="btn btn-success w-100">Buy Product</a>
+        </div>
       </div>
-    </div>
-    {% endif %}
     {% endfor %}
   </div>
+  {% endif %}
+
+  <!-- Supplements Section -->
+  {% if supplements %}
+  <h2 class="text-danger fw-bold mb-4">💊 Supplements</h2>
+  <div class="row g-4">
+    {% for i in supplements %}
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card shadow-lg h-100 border-0 hover-card text-center p-3">
+          <h5 class="text-danger fw-bold mb-2">Supplement</h5>
+          <p class="fw-semibold mb-1">For {{ disease[i] }}</p>
+          <p class="mb-3">{{ supplement_name[i] }}</p>
+          <a href="{{ buy[i] }}" target="_blank" class="btn btn-success w-100">Buy Product</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
 </div>
 
 <style>
